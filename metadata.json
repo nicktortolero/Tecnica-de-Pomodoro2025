@@ -1,0 +1,5 @@
+{
+  "name": "Pomodoro Pro with Gemini AI",
+  "description": "A productivity timer with Pomodoro, breaks, task management, achievements, and integrated Gemini AI for content analysis and editing.",
+  "requestFramePermissions": []
+}
