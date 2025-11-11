@@ -4,10 +4,25 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/index.tsx', // Main React entry point
+    '/App.tsx',
+    '/types.ts',
+    '/constants.ts',
+    '/serviceWorkerRegistration.ts',
+    '/services/geminiService.ts',
+    '/components/Button.tsx',
+    '/components/ModeButton.tsx',
+    '/components/TimerDisplay.tsx',
+    '/components/TimerControls.tsx',
+    '/components/TaskInput.tsx',
+    '/components/TaskList.tsx',
+    '/components/AchievementBadge.tsx',
+    '/components/BackgroundModeIndicator.tsx',
+    '/components/Modals/StatsModal.tsx',
+    '/components/Modals/SettingsModal.tsx',
+    '/components/Modals/ThemeModal.tsx',
+    '/components/Modals/GeminiModal.tsx',
     '/service-worker.js', // The service worker itself
-    // Note: External CDN links (Tailwind, Font Awesome, Google Fonts, @google/genai, React, Recharts)
-    // are typically handled by browser's HTTP cache. For full offline, you'd need to cache them here too,
-    // but often their own headers make them long-lived. We focus on app's own assets first.
+    '/manifest.json', // PWA manifest
     // Placeholder icons for PWA manifest. In a real app, you'd create these and place them under /icons.
     '/icons/icon-192x192.png',
     '/icons/icon-512x512.png'
