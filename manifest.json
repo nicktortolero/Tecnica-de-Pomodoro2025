@@ -1,0 +1,27 @@
+{
+  "name": "Pomodoro Pro con Gemini AI",
+  "short_name": "Pomodoro Pro",
+  "description": "Un temporizador de productividad con Pomodoro, descansos, gestión de tareas, logros e IA Gemini integrada para análisis y edición de contenido.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a202c",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

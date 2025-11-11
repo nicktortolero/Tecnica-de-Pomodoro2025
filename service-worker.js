@@ -1,7 +1,93 @@
 // service-worker.js
+const CACHE_NAME = 'pomodoro-pro-cache-v1';
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/index.tsx', // Main React entry point
+    '/service-worker.js', // The service worker itself
+    // Note: External CDN links (Tailwind, Font Awesome, Google Fonts, @google/genai, React, Recharts)
+    // are typically handled by browser's HTTP cache. For full offline, you'd need to cache them here too,
+    // but often their own headers make them long-lived. We focus on app's own assets first.
+    // Placeholder icons for PWA manifest. In a real app, you'd create these and place them under /icons.
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png'
+];
+
 let timerInterval = null;
 let currentState = null; // Stores { time: remainingSeconds, mode: 'pomodoro' }
 let endTime = null;
+
+self.addEventListener('install', event => {
+    self.skipWaiting();
+    console.log('Service Worker instalado. Saltando la espera.');
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log('Cache abierta');
+                return cache.addAll(urlsToCache);
+            })
+    );
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== CACHE_NAME) {
+                        console.log('Service Worker: Eliminando caché antigua', cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
+    console.log('Service Worker activado y clientes reclamados.');
+});
+
+self.addEventListener('fetch', event => {
+    // Only cache GET requests
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
+    event.respondWith(
+        caches.match(event.request).then(response => {
+            // Cache hit - return response
+            if (response) {
+                return response;
+            }
+            // No cache hit - fetch from network
+            return fetch(event.request).then(
+                networkResponse => {
+                    // Check if we received a valid response
+                    if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                        return networkResponse;
+                    }
+                    // IMPORTANT: Clone the response. A response is a stream
+                    // and can only be consumed once. We must clone it so that
+                    // the browser can consume one and we can consume the other.
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    return networkResponse;
+                }
+            ).catch(() => {
+                // This catch handles network errors
+                // You could serve an offline page here if you had one
+                console.log('Service Worker: Fallo en la red para', event.request.url);
+                // If it's the main document, try to serve from cache even if not in urlsToCache
+                if (event.request.mode === 'navigate') {
+                    return caches.match('/index.html');
+                }
+                return new Response('Offline', { status: 503, statusText: 'Service Unavailable', headers: new Headers({ 'Content-Type': 'text/plain' }) });
+            });
+        })
+    );
+});
+
 
 self.addEventListener('message', event => {
     const message = event.data;
@@ -85,7 +171,7 @@ function showNotification() {
     if (!currentState) return;
 
     let title, body;
-    let iconUrl = 'https://picsum.photos/64/64'; // Placeholder icon
+    let iconUrl = '/icons/icon-192x192.png'; // Use PWA icon
 
     switch(currentState.mode) {
         case 'pomodoro':
@@ -115,14 +201,3 @@ function showNotification() {
         vibrate: [200, 100, 200]
     });
 }
-
-// Keep service worker alive and claim clients on activate
-self.addEventListener('activate', event => {
-    event.waitUntil(self.clients.claim());
-    console.log('Service Worker activado y clientes reclamados.');
-});
-
-self.addEventListener('install', event => {
-    self.skipWaiting();
-    console.log('Service Worker instalado. Saltando la espera.');
-});
